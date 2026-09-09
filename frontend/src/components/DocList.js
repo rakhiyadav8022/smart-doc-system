@@ -4,7 +4,7 @@ import axios from 'axios';
 function DocList({ documents, search, setSearch, onStatusUpdate }) {
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await axios.patch(`http://localhost:5000/api/documents/${id}/status`, {
+      await axios.patch(`https://smart-doc-system.onrender.com/api/documents/${id}/status`, {
         status: newStatus
       });
       onStatusUpdate();

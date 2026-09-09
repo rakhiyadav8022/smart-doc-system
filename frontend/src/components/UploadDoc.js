@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 
 function UploadDoc({ onUploadSuccess }) {
@@ -18,7 +19,7 @@ function UploadDoc({ onUploadSuccess }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/documents', formData);
+      await axios.post('https://smart-doc-system.onrender.com/api/documents', formData);
       alert('Document saved successfully in MongoDB!');
       setFormData({ title: '', department: '', category: '', fileData: '' });
       onUploadSuccess();
