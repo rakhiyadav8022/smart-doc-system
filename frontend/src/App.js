@@ -11,7 +11,7 @@ function App() {
 
   const fetchDocuments = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/documents?search=${search}`);
+      const response = await axios.get(`https://smart-doc-system.onrender.com/api/documents?search=${search}`);
       setDocuments(response.data);
     } catch (err) {
       console.error('Error fetching documents:', err);
