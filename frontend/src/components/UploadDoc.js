@@ -1,8 +1,9 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 
-function UploadDoc({ onUploadSuccess }) {
+const BACKEND_URL = 'https://smart-doc-system.onrender.com';
+
+function UploadDoc({ user, onUploadSuccess }) {
   const [formData, setFormData] = useState({
     title: '',
     department: '',
@@ -19,8 +20,11 @@ function UploadDoc({ onUploadSuccess }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('https://smart-doc-system.onrender.com/api/documents', formData);
-      alert('Document saved successfully in MongoDB!');
+      await axios.post(`${BACKEND_URL}/api/documents`, {
+        ...formData,
+        userId: user.id
+      });
+      alert('Document saved successfully to your registry!');
       setFormData({ title: '', department: '', category: '', fileData: '' });
       onUploadSuccess();
     } catch (err) {
@@ -40,7 +44,7 @@ function UploadDoc({ onUploadSuccess }) {
           <input
             type="text"
             name="title"
-            placeholder="e.g., Land Revenue Circular 2026"
+            placeholder="e.g., Land Revenue Deed 2026"
             value={formData.title}
             onChange={handleChange}
             required
@@ -52,7 +56,7 @@ function UploadDoc({ onUploadSuccess }) {
           <input
             type="text"
             name="department"
-            placeholder="e.g., Revenue, Transport, Education"
+            placeholder="e.g., Revenue, Health, Transport"
             value={formData.department}
             onChange={handleChange}
             required
@@ -84,7 +88,7 @@ function UploadDoc({ onUploadSuccess }) {
         </div>
 
         <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Saving to Database...' : 'Save to Digital Registry'}
+          {loading ? 'Saving to Registry...' : 'Save to Digital Registry'}
         </button>
       </form>
     </div>
