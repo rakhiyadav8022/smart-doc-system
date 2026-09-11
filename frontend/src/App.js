@@ -11,7 +11,6 @@ function App() {
   const [documents, setDocuments] = useState([]);
   const [search, setSearch] = useState('');
 
-  // Check saved session on load
   useEffect(() => {
     const savedUser = localStorage.getItem('doc_user');
     if (savedUser) {
@@ -44,7 +43,6 @@ function App() {
     setDocuments([]);
   };
 
-  // Agar user logged-in nahi hai toh seedha Login Screen dikhayega
   if (!user) {
     return <Login onLoginSuccess={(userData) => setUser(userData)} />;
   }
@@ -52,7 +50,6 @@ function App() {
   return (
     <div className="app-container">
       <Navbar user={user} onLogout={handleLogout} />
-
       <main className="main-content">
         <div className="dashboard-grid">
           <div className="grid-col left-col">

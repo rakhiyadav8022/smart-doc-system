@@ -1,29 +1,62 @@
-import React from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { jsPDF } from 'jspdf';
 
 function DocList({ documents, search, setSearch, onStatusUpdate }) {
-  const handleStatusChange = async (id, newStatus) => {
+  const [editingDoc, setEditingDoc] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    title: '',
+    department: '',
+    category: '',
+    fileData: ''
+  });
+
+  const API_URL = 'https://smart-doc-system.onrender.com';
+
+  // Delete Document Function
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm('Are you sure you want to permanently delete this document?');
+    if (!confirmDelete) return;
+
     try {
-      await axios.patch(`https://smart-doc-system.onrender.com/api/documents/${id}/status`, {
-        status: newStatus
-      });
+      await axios.delete(`${API_URL}/api/documents/${id}`);
+      alert('Document deleted successfully!');
       onStatusUpdate();
     } catch (err) {
-      alert('Status update failed: ' + err.message);
+      alert('Delete failed: ' + (err.response?.data?.error || err.message));
+    }
+  };
+
+  // Edit Button Click
+  const handleEditClick = (doc) => {
+    setEditingDoc(doc._id);
+    setEditFormData({
+      title: doc.title,
+      department: doc.department,
+      category: doc.category,
+      fileData: doc.fileData
+    });
+  };
+
+  // Save Updated Document
+  const handleUpdateSubmit = async (id) => {
+    try {
+      await axios.put(`${API_URL}/api/documents/${id}`, editFormData);
+      alert('Document updated successfully!');
+      setEditingDoc(null);
+      onStatusUpdate();
+    } catch (err) {
+      alert('Update failed: ' + (err.response?.data?.error || err.message));
     }
   };
 
   // PDF Download Logic
   const handleDownloadPDF = (doc) => {
     const pdf = new jsPDF();
-
-    // Header / Border Styling
     pdf.setDrawColor(20, 60, 120);
     pdf.setLineWidth(1);
     pdf.rect(10, 10, 190, 277);
 
-    // Title & Header
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(16);
     pdf.setTextColor(20, 60, 120);
@@ -37,52 +70,43 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
     pdf.setDrawColor(200);
     pdf.line(15, 36, 195, 36);
 
-    // Document Metadata
     pdf.setFontSize(11);
     pdf.setTextColor(20);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(`Title / Subject: `, 20, 48);
+    pdf.text('Title / Subject: ', 20, 48);
     pdf.setFont('helvetica', 'normal');
     pdf.text(`${doc.title}`, 60, 48);
 
     pdf.setFont('helvetica', 'bold');
-    pdf.text(`Department: `, 20, 56);
+    pdf.text('Department: ', 20, 56);
     pdf.setFont('helvetica', 'normal');
     pdf.text(`${doc.department}`, 60, 56);
 
     pdf.setFont('helvetica', 'bold');
-    pdf.text(`Category: `, 20, 64);
+    pdf.text('Category: ', 20, 64);
     pdf.setFont('helvetica', 'normal');
     pdf.text(`${doc.category}`, 60, 64);
 
     pdf.setFont('helvetica', 'bold');
-    pdf.text(`Status: `, 20, 72);
+    pdf.text('Date Digitized: ', 20, 72);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`${doc.status}`, 60, 72);
-
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(`Date Digitized: `, 20, 80);
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(`${new Date(doc.uploadedAt).toLocaleString()}`, 60, 80);
+    pdf.text(`${new Date(doc.uploadedAt).toLocaleString()}`, 60, 72);
 
     pdf.setDrawColor(200);
-    pdf.line(15, 86, 195, 86);
+    pdf.line(15, 80, 195, 80);
 
-    // Content Section
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Digitized / Extracted Content:', 20, 96);
+    pdf.text('Digitized / Extracted Content:', 20, 90);
 
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(10);
     const splitText = pdf.splitTextToSize(doc.fileData, 170);
-    pdf.text(splitText, 20, 105);
+    pdf.text(splitText, 20, 98);
 
-    // Footer
     pdf.setFontSize(9);
     pdf.setTextColor(130);
     pdf.text('Digitally generated & authenticated via Smart Doc Registry.', 105, 280, { align: 'center' });
 
-    // Download file
     pdf.save(`${doc.title.replace(/[^a-zA-Z0-9]/g, '_')}_document.pdf`);
   };
 
@@ -107,46 +131,102 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
         ) : (
           documents.map((doc) => (
             <div key={doc._id} className="doc-card">
-              <div className="doc-header">
-                <span className="doc-title">{doc.title}</span>
-                <span className={`status-badge ${doc.status.toLowerCase()}`}>
-                  {doc.status}
-                </span>
-              </div>
+              {editingDoc === doc._id ? (
+                /* Edit Mode Form */
+                <div className="edit-form-wrapper">
+                  <div className="form-group">
+                    <label>Title</label>
+                    <input
+                      type="text"
+                      value={editFormData.title}
+                      onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Department</label>
+                    <input
+                      type="text"
+                      value={editFormData.department}
+                      onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Category</label>
+                    <input
+                      type="text"
+                      value={editFormData.category}
+                      onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Extracted Content</label>
+                    <textarea
+                      rows="3"
+                      value={editFormData.fileData}
+                      onChange={(e) => setEditFormData({ ...editFormData, fileData: e.target.value })}
+                    />
+                  </div>
+                  <div className="doc-actions" style={{ marginTop: '10px' }}>
+                    <button
+                      onClick={() => handleUpdateSubmit(doc._id)}
+                      className="btn"
+                      style={{ backgroundColor: '#16a34a', color: '#fff' }}
+                    >
+                      💾 Save Changes
+                    </button>
+                    <button
+                      onClick={() => setEditingDoc(null)}
+                      className="btn"
+                      style={{ backgroundColor: '#64748b', color: '#fff' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Normal View */
+                <>
+                  <div className="doc-header">
+                    <span className="doc-title">{doc.title}</span>
+                    <span className="count-pill" style={{ background: '#f1f5f9', color: '#475569' }}>
+                      {doc.category}
+                    </span>
+                  </div>
 
-              <div className="doc-meta">
-                <span>🏢 <strong>Dept:</strong> {doc.department}</span>
-                <span>🏷️ <strong>Category:</strong> {doc.category}</span>
-                <span>🕒 {new Date(doc.uploadedAt).toLocaleDateString()}</span>
-              </div>
+                  <div className="doc-meta">
+                    <span>🏢 <strong>Dept:</strong> {doc.department}</span>
+                    <span>🕒 {new Date(doc.uploadedAt).toLocaleDateString()}</span>
+                  </div>
 
-              <div className="doc-body">
-                <p>{doc.fileData}</p>
-              </div>
+                  <div className="doc-body">
+                    <p>{doc.fileData}</p>
+                  </div>
 
-              <div className="doc-actions">
-                <button
-                  onClick={() => handleStatusChange(doc._id, 'Verified')}
-                  className="btn btn-verify"
-                  disabled={doc.status === 'Verified'}
-                >
-                  ✓ Mark Verified
-                </button>
-                <button
-                  onClick={() => handleStatusChange(doc._id, 'Archived')}
-                  className="btn btn-archive"
-                  disabled={doc.status === 'Archived'}
-                >
-                  📁 Archive
-                </button>
-                <button
-                  onClick={() => handleDownloadPDF(doc)}
-                  className="btn"
-                  style={{ backgroundColor: '#2563eb', color: '#fff' }}
-                >
-                  📥 Download PDF
-                </button>
-              </div>
+                  <div className="doc-actions">
+                    <button
+                      onClick={() => handleEditClick(doc)}
+                      className="btn"
+                      style={{ backgroundColor: '#f59e0b', color: '#ffffff' }}
+                    >
+                      ✏️ Update
+                    </button>
+                    <button
+                      onClick={() => handleDelete(doc._id)}
+                      className="btn"
+                      style={{ backgroundColor: '#ef4444', color: '#ffffff' }}
+                    >
+                      🗑️ Delete
+                    </button>
+                    <button
+                      onClick={() => handleDownloadPDF(doc)}
+                      className="btn"
+                      style={{ backgroundColor: '#1d4ed8', color: '#ffffff' }}
+                    >
+                      📥 Download PDF
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ))
         )}
