@@ -19,9 +19,9 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', UserSchema);
 
-// --- Document Schema (Linked with User) ---
+// --- Document Schema (userId optional rakha hai taaki purane records crash na karein) ---
 const DocumentSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   title: { type: String, required: true },
   department: { type: String, required: true },
   category: { type: String, required: true },
@@ -83,15 +83,12 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// --- Document Routes (User Isolated) ---
+// --- Document Routes ---
 
-// Save Document (Linked to logged-in user)
+// Save Document
 app.post('/api/documents', async (req, res) => {
   try {
     const { userId, title, department, category, fileData } = req.body;
-    if (!userId) {
-      return res.status(400).json({ error: 'User ID is required' });
-    }
     const newDoc = new Document({ userId, title, department, category, fileData });
     await newDoc.save();
     res.status(201).json({ message: 'Document saved successfully!', newDoc });
@@ -100,25 +97,34 @@ app.post('/api/documents', async (req, res) => {
   }
 });
 
-// Get Only Logged-in User's Documents
+// Get Documents (User ke records + Purane legacy records dono aayenge)
 app.get('/api/documents', async (req, res) => {
   try {
     const { userId, search } = req.query;
-    if (!userId) {
-      return res.status(400).json({ error: 'User ID missing' });
-    }
 
-    let query = { userId };
+    // Filter: Logged-in user ke records OR wo purane records jinka koi userId nahi tha
+    let userFilter = {
+      $or: [
+        { userId: userId },
+        { userId: { $exists: false } },
+        { userId: null }
+      ]
+    };
+
+    let query = { ...userFilter };
+
     if (search) {
-      query.$and = [
-        { userId },
-        {
-          $or: [
-            { title: { $regex: search, $options: 'i' } },
-            { department: { $regex: search, $options: 'i' } }
-          ]
-        }
-      ];
+      query = {
+        $and: [
+          userFilter,
+          {
+            $or: [
+              { title: { $regex: search, $options: 'i' } },
+              { department: { $regex: search, $options: 'i' } }
+            ]
+          }
+        ]
+      };
     }
 
     const docs = await Document.find(query).sort({ uploadedAt: -1 });
