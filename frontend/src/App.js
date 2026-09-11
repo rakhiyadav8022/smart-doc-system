@@ -3,10 +3,8 @@ import axios from 'axios';
 import Navbar from './components/Navbar';
 import UploadDoc from './components/UploadDoc';
 import DocList from './components/DocList';
-import Auth from './components/Auth';
+import Login from './components/Login';
 import './App.css';
-
-const BACKEND_URL = 'https://smart-doc-system.onrender.com';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -24,7 +22,9 @@ function App() {
   const fetchDocuments = async () => {
     if (!user) return;
     try {
-      const response = await axios.get(`${BACKEND_URL}/api/documents?userId=${user.id}&search=${search}`);
+      const response = await axios.get(
+        `https://smart-doc-system.onrender.com/api/documents?userId=${user.id}&search=${search}`
+      );
       setDocuments(response.data);
     } catch (err) {
       console.error('Error fetching documents:', err);
@@ -39,32 +39,34 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('doc_user');
+    localStorage.removeItem('doc_token');
     setUser(null);
     setDocuments([]);
   };
+
+  // Agar user logged-in nahi hai toh seedha Login Screen dikhayega
+  if (!user) {
+    return <Login onLoginSuccess={(userData) => setUser(userData)} />;
+  }
 
   return (
     <div className="app-container">
       <Navbar user={user} onLogout={handleLogout} />
 
       <main className="main-content">
-        {!user ? (
-          <Auth onLoginSuccess={(userData) => setUser(userData)} />
-        ) : (
-          <div className="dashboard-grid">
-            <div className="grid-col left-col">
-              <UploadDoc user={user} onUploadSuccess={fetchDocuments} />
-            </div>
-            <div className="grid-col right-col">
-              <DocList
-                documents={documents}
-                search={search}
-                setSearch={setSearch}
-                onStatusUpdate={fetchDocuments}
-              />
-            </div>
+        <div className="dashboard-grid">
+          <div className="grid-col left-col">
+            <UploadDoc user={user} onUploadSuccess={fetchDocuments} />
           </div>
-        )}
+          <div className="grid-col right-col">
+            <DocList
+              documents={documents}
+              search={search}
+              setSearch={setSearch}
+              onStatusUpdate={fetchDocuments}
+            />
+          </div>
+        </div>
       </main>
     </div>
   );

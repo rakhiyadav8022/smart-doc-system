@@ -9,15 +9,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- 1. User Schema ---
+// --- User Schema ---
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
+  password: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
 });
+
 const User = mongoose.model('User', UserSchema);
 
-// --- 2. Document Schema (With userId Link) ---
+// --- Document Schema (Linked with User) ---
 const DocumentSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   title: { type: String, required: true },
@@ -31,6 +33,7 @@ const DocumentSchema = new mongoose.Schema({
   },
   uploadedAt: { type: Date, default: Date.now }
 });
+
 const Document = mongoose.model('Document', DocumentSchema);
 
 // --- Database Connection ---
@@ -40,17 +43,19 @@ mongoose.connect(MONGO_URI)
   .catch((err) => console.log('DB Connection Error:', err));
 
 // --- Auth Routes ---
-// Signup
+
+// Signup (Register)
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ error: 'User already exists' });
-
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already registered. Please Login.' });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword });
-    await user.save();
-    res.status(201).json({ message: 'Registered successfully!' });
+    const newUser = new User({ name, email, password: hashedPassword });
+    await newUser.save();
+    res.status(201).json({ message: 'Registration successful! You can now login.' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -61,25 +66,32 @@ app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ error: 'Invalid Email or Password' });
-
+    if (!user) {
+      return res.status(400).json({ error: 'User does not exist with this email.' });
+    }
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ error: 'Invalid Email or Password' });
-
-    const token = jwt.sign({ id: user._id, name: user.name }, 'SECRET_KEY_123', { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Invalid password.' });
+    }
+    const token = jwt.sign({ userId: user._id }, 'GOV_PORTAL_SECRET_KEY', { expiresIn: '7d' });
+    res.json({
+      token,
+      user: { id: user._id, name: user.name, email: user.email }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// --- Document Routes (Filtered by Logged-in User) ---
-// Save Document
+// --- Document Routes (User Isolated) ---
+
+// Save Document (Linked to logged-in user)
 app.post('/api/documents', async (req, res) => {
   try {
     const { userId, title, department, category, fileData } = req.body;
-    if (!userId) return res.status(400).json({ error: 'User ID is required' });
-
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
     const newDoc = new Document({ userId, title, department, category, fileData });
     await newDoc.save();
     res.status(201).json({ message: 'Document saved successfully!', newDoc });
@@ -88,11 +100,13 @@ app.post('/api/documents', async (req, res) => {
   }
 });
 
-// Get Only User's Documents
+// Get Only Logged-in User's Documents
 app.get('/api/documents', async (req, res) => {
   try {
     const { userId, search } = req.query;
-    if (!userId) return res.status(400).json({ error: 'User ID missing' });
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID missing' });
+    }
 
     let query = { userId };
     if (search) {
@@ -114,7 +128,7 @@ app.get('/api/documents', async (req, res) => {
   }
 });
 
-// Update Status
+// Status Update
 app.patch('/api/documents/:id/status', async (req, res) => {
   try {
     const { status } = req.body;

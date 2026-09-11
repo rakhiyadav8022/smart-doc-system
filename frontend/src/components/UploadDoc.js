@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const BACKEND_URL = 'https://smart-doc-system.onrender.com';
-
 function UploadDoc({ user, onUploadSuccess }) {
   const [formData, setFormData] = useState({
     title: '',
@@ -20,11 +18,11 @@ function UploadDoc({ user, onUploadSuccess }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${BACKEND_URL}/api/documents`, {
+      await axios.post('https://smart-doc-system.onrender.com/api/documents', {
         ...formData,
         userId: user.id
       });
-      alert('Document saved successfully to your registry!');
+      alert('Document saved successfully in your personal vault!');
       setFormData({ title: '', department: '', category: '', fileData: '' });
       onUploadSuccess();
     } catch (err) {
@@ -37,14 +35,14 @@ function UploadDoc({ user, onUploadSuccess }) {
   return (
     <div className="card">
       <h3>📄 Digitize New Record</h3>
-      <p className="card-subtitle">Enter document details or paste extracted text</p>
+      <p className="card-subtitle">Saved exclusively to {user.name}'s vault</p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Document Title / Subject</label>
           <input
             type="text"
             name="title"
-            placeholder="e.g., Land Revenue Deed 2026"
+            placeholder="e.g., Land Revenue Circular 2026"
             value={formData.title}
             onChange={handleChange}
             required
@@ -56,7 +54,7 @@ function UploadDoc({ user, onUploadSuccess }) {
           <input
             type="text"
             name="department"
-            placeholder="e.g., Revenue, Health, Transport"
+            placeholder="e.g., Revenue, Transport, UIDAI"
             value={formData.department}
             onChange={handleChange}
             required
@@ -68,7 +66,7 @@ function UploadDoc({ user, onUploadSuccess }) {
           <input
             type="text"
             name="category"
-            placeholder="e.g., Policy, Registry, Certificate"
+            placeholder="e.g., Identity, Registry, Certificate"
             value={formData.category}
             onChange={handleChange}
             required
@@ -80,7 +78,7 @@ function UploadDoc({ user, onUploadSuccess }) {
           <textarea
             name="fileData"
             rows="4"
-            placeholder="Paste digitized text or summary here..."
+            placeholder="Paste digitized text or certificate details..."
             value={formData.fileData}
             onChange={handleChange}
             required
@@ -88,7 +86,7 @@ function UploadDoc({ user, onUploadSuccess }) {
         </div>
 
         <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Saving to Registry...' : 'Save to Digital Registry'}
+          {loading ? 'Saving to Database...' : 'Save to Personal Registry'}
         </button>
       </form>
     </div>
