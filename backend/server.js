@@ -1,4 +1,4 @@
-// --- Update Document ---
+// Update Document Route
 app.put('/api/documents/:id', async (req, res) => {
   try {
     const { title, department, category, fileData } = req.body;
@@ -7,17 +7,12 @@ app.put('/api/documents/:id', async (req, res) => {
       { title, department, category, fileData },
       { new: true }
     );
-    res.json({ message: 'Document updated successfully!', updatedDoc });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
-// --- Delete Document ---
-app.delete('/api/documents/:id', async (req, res) => {
-  try {
-    await Document.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Document deleted successfully!' });
+    if (!updatedDoc) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    res.json({ message: 'Document updated successfully!', updatedDoc });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
