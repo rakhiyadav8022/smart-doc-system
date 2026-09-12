@@ -5,6 +5,7 @@ import '../Login.css';
 function Login({ onLoginSuccess }) {
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false); // Toggle state
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -78,14 +79,24 @@ function Login({ onLoginSuccess }) {
 
           <div className="auth-form-group">
             <label>Master Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter secure password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                placeholder="Enter secure password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+              <button
+                type="button"
+                className="btn-toggle-password"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="auth-btn" disabled={loading}>

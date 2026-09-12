@@ -1,45 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import axios from 'axios';
 import { jsPDF } from 'jspdf';
 
 function DocList({ documents, search, setSearch, onStatusUpdate }) {
-  const [editingDocId, setEditingDocId] = useState(null);
-  const [editFormData, setEditFormData] = useState({
-    title: '',
-    department: '',
-    category: '',
-    fileData: ''
-  });
-
   const API_URL = 'https://smart-doc-system.onrender.com';
-
-  const handleEditClick = (doc) => {
-    setEditingDocId(doc._id);
-    setEditFormData({
-      title: doc.title || '',
-      department: doc.department || '',
-      category: doc.category || '',
-      fileData: doc.fileData || ''
-    });
-  };
-
-  const handleEditChange = (e) => {
-    setEditFormData({
-      ...editFormData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleUpdateSubmit = async (id) => {
-    try {
-      await axios.put(`${API_URL}/api/documents/${id}`, editFormData);
-      alert('Document updated successfully!');
-      setEditingDocId(null);
-      onStatusUpdate();
-    } catch (err) {
-      alert('Update failed: ' + (err.response?.data?.error || err.message));
-    }
-  };
 
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm('Are you sure you want to permanently delete this document?');
@@ -113,6 +77,105 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
     pdf.save(`${(doc.title || 'document').replace(/[^a-zA-Z0-9]/g, '_')}_document.pdf`);
   };
 
+  // Helper: Identify document type for rendering custom cards
+  const renderDocumentFormat = (doc) => {
+    const text = `${doc.title} ${doc.category} ${doc.department}`.toLowerCase();
+
+    // 1. Aadhaar Card
+    if (text.includes('aadhar') || text.includes('aadhaar') || text.includes('uidai')) {
+      return (
+        <div className="doc-preview-wrapper aadhar-card-view">
+          <div className="aadhar-top-strip"></div>
+          <div className="aadhar-header">
+            <h4>भारत सरकार | Government of India</h4>
+            <span style={{ fontSize: '10px', color: '#64748b' }}>UIDAI Secure Card</span>
+          </div>
+          <div className="aadhar-body-grid">
+            <div className="aadhar-photo-box">👤</div>
+            <div className="aadhar-details">
+              <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}>
+                {doc.fileData}
+              </pre>
+            </div>
+            <div className="aadhar-qr-box">SECURE<br />QR</div>
+          </div>
+          <div className="aadhar-number-bar">XXXX - XXXX - XXXX</div>
+          <div className="aadhar-footer-text">मेरा आधार, मेरी पहचान</div>
+        </div>
+      );
+    }
+
+    // 2. PAN Card
+    if (text.includes('pan') || text.includes('income tax')) {
+      return (
+        <div className="doc-preview-wrapper pan-card-view">
+          <div className="pan-header">
+            <h4>INCOME TAX DEPARTMENT | GOVT. OF INDIA</h4>
+            <span style={{ fontSize: '11px' }}>PERMANENT ACCOUNT CARD</span>
+          </div>
+          <div className="pan-body">
+            <div className="pan-photo-box">👤</div>
+            <div className="pan-info">
+              <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}>
+                {doc.fileData}
+              </pre>
+              <div className="pan-signature-bar">Digitally Signed Holder</div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 3. Driving License / Vehicle RC
+    if (text.includes('license') || text.includes('licence') || text.includes('driving') || text.includes('transport') || text.includes('rc')) {
+      return (
+        <div className="doc-preview-wrapper dl-card-view">
+          <div className="dl-header">
+            <h4>UNION OF INDIA | DRIVING LICENCE</h4>
+            <span style={{ fontSize: '11px' }}>FORM 7 SMART CARD</span>
+          </div>
+          <div className="dl-body">
+            <div className="aadhar-photo-box">👤</div>
+            <div style={{ fontSize: '12px', color: '#0f172a' }}>
+              <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}>
+                {doc.fileData}
+              </pre>
+            </div>
+            <div className="dl-chip" title="Smart Chip"></div>
+          </div>
+        </div>
+      );
+    }
+
+    // 4. Certificates / Marks Sheet / Degrees
+    if (text.includes('certificate') || text.includes('marksheet') || text.includes('degree') || text.includes('diploma') || text.includes('education')) {
+      return (
+        <div className="doc-preview-wrapper cert-card-view">
+          <div className="cert-badge">🏅</div>
+          <div className="cert-title">CERTIFICATE OF RECOGNITION</div>
+          <div className="cert-content">
+            <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}>
+              {doc.fileData}
+            </pre>
+          </div>
+        </div>
+      );
+    }
+
+    // 5. Default Government Order / Land Record / Deeds
+    return (
+      <div className="doc-preview-wrapper order-card-view">
+        <span className="order-stamp">OFFICIAL RECORD</span>
+        <div className="order-heading">🏛️ {doc.department} - {doc.title}</div>
+        <div className="order-body">
+          <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}>
+            {doc.fileData}
+          </pre>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="card">
       <div className="card-header-flex">
@@ -134,109 +197,39 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
         ) : (
           documents.map((doc) => (
             <div key={doc._id} className="doc-card">
-              {editingDocId === doc._id ? (
-                <div>
-                  <div className="form-group">
-                    <label>Title</label>
-                    <input
-                      type="text"
-                      name="title"
-                      value={editFormData.title}
-                      onChange={handleEditChange}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Department</label>
-                    <input
-                      type="text"
-                      name="department"
-                      value={editFormData.department}
-                      onChange={handleEditChange}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Category</label>
-                    <input
-                      type="text"
-                      name="category"
-                      value={editFormData.category}
-                      onChange={handleEditChange}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Extracted Content</label>
-                    <textarea
-                      rows="3"
-                      name="fileData"
-                      value={editFormData.fileData}
-                      onChange={handleEditChange}
-                    />
-                  </div>
-                  <div className="doc-actions" style={{ marginTop: '10px' }}>
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateSubmit(doc._id)}
-                      className="btn"
-                      style={{ backgroundColor: '#16a34a', color: '#fff' }}
-                    >
-                      💾 Save Changes
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditingDocId(null)}
-                      className="btn"
-                      style={{ backgroundColor: '#64748b', color: '#fff' }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="doc-header">
-                    <span className="doc-title">{doc.title}</span>
-                    <span className="count-pill" style={{ background: '#f1f5f9', color: '#475569' }}>
-                      {doc.category}
-                    </span>
-                  </div>
+              <div className="doc-header">
+                <span className="doc-title">{doc.title}</span>
+                <span className="count-pill" style={{ background: '#f1f5f9', color: '#475569' }}>
+                  {doc.category}
+                </span>
+              </div>
 
-                  <div className="doc-meta">
-                    <span>🏢 <strong>Dept:</strong> {doc.department}</span>
-                    <span>🕒 {new Date(doc.uploadedAt).toLocaleDateString()}</span>
-                  </div>
+              <div className="doc-meta">
+                <span>🏢 <strong>Dept:</strong> {doc.department}</span>
+                <span>🕒 {new Date(doc.uploadedAt).toLocaleDateString()}</span>
+              </div>
 
-                  <div className="doc-body">
-                    <p>{doc.fileData}</p>
-                  </div>
+              {/* Dynamic Design Output based on Document Type */}
+              {renderDocumentFormat(doc)}
 
-                  <div className="doc-actions">
-                    <button
-                      type="button"
-                      onClick={() => handleEditClick(doc)}
-                      className="btn"
-                      style={{ backgroundColor: '#f59e0b', color: '#ffffff' }}
-                    >
-                      ✏️ Update
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(doc._id)}
-                      className="btn"
-                      style={{ backgroundColor: '#ef4444', color: '#ffffff' }}
-                    >
-                      🗑️ Delete
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDownloadPDF(doc)}
-                      className="btn"
-                      style={{ backgroundColor: '#1d4ed8', color: '#ffffff' }}
-                    >
-                      📥 Download PDF
-                    </button>
-                  </div>
-                </>
-              )}
+              <div className="doc-actions" style={{ marginTop: '14px' }}>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(doc._id)}
+                  className="btn"
+                  style={{ backgroundColor: '#ef4444', color: '#ffffff' }}
+                >
+                  🗑️ Delete
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDownloadPDF(doc)}
+                  className="btn"
+                  style={{ backgroundColor: '#1d4ed8', color: '#ffffff' }}
+                >
+                  📥 Download PDF
+                </button>
+              </div>
             </div>
           ))
         )}

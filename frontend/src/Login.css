@@ -1,115 +1,30 @@
-.auth-wrapper {
-  min-height: 100vh;
+/* Password Field Wrapper & Eye Icon */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  padding-right: 44px; /* Icon ke liye space */
+}
+
+.btn-toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0369a1 100%);
-  padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.auth-card {
-  width: 100%;
-  max-width: 440px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  padding: 36px 32px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.auth-header h2 {
-  color: #0f172a;
-  font-size: 24px;
-  margin-bottom: 6px;
-}
-
-.auth-header p {
+  padding: 4px;
   color: #64748b;
-  font-size: 14px;
-}
-
-.auth-error {
-  background: #fee2e2;
-  color: #b91c1c;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  margin-bottom: 18px;
-  border: 1px solid #fca5a5;
-}
-
-.auth-form-group {
-  margin-bottom: 18px;
-}
-
-.auth-form-group label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #334155;
-  margin-bottom: 6px;
-}
-
-.auth-form-group input {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 8px;
-  border: 1.5px solid #cbd5e1;
-  font-size: 14px;
   outline: none;
-  transition: all 0.2s;
-  box-sizing: border-box;
+  user-select: none;
 }
 
-.auth-form-group input:focus {
-  border-color: #0284c7;
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
-}
-
-.auth-btn {
-  width: 100%;
-  padding: 13px;
-  background: #0284c7;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-top: 6px;
-}
-
-.auth-btn:hover {
-  background: #0369a1;
-}
-
-.auth-btn:disabled {
-  background: #94a3b8;
-  cursor: not-allowed;
-}
-
-.auth-toggle {
-  text-align: center;
-  margin-top: 22px;
-  font-size: 14px;
-  color: #64748b;
-}
-
-.auth-toggle-link {
-  color: #0284c7;
-  font-weight: 600;
-  cursor: pointer;
-  margin-left: 6px;
-}
-
-.auth-toggle-link:hover {
-  text-decoration: underline;
+.btn-toggle-password:hover {
+  opacity: 0.8;
 }
