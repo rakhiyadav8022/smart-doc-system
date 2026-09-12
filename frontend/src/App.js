@@ -49,49 +49,50 @@ function App() {
     return <Login onLoginSuccess={(userData) => setUser(userData)} />;
   }
 
-  const layoutStyles = {
-    pageWrapper: {
+  return (
+    <div style={{
       backgroundColor: '#f1f5f9',
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
       fontFamily: 'Segoe UI, Roboto, sans-serif'
-    },
-    mainContainer: {
-      maxWidth: '1300px',
-      width: '100%',
-      margin: '20px auto',
-      padding: '0 20px',
-      boxSizing: 'border-box'
-    },
-    gridContainer: {
-      display: 'grid',
-      gridTemplateColumns: '400px 1fr', // Form fixed, Repository flexible
-      gap: '20px',
-      alignItems: 'start'
-    },
-    col: {
-      width: '100%',
-      minWidth: 0
-    }
-  };
-
-  return (
-    <div style={layoutStyles.pageWrapper}>
+    }}>
       <Navbar user={user} onLogout={handleLogout} />
-      <main style={layoutStyles.mainContainer}>
-        <div style={layoutStyles.gridContainer}>
-          <section style={layoutStyles.col}>
+
+      <main style={{
+        maxWidth: '1280px',
+        width: '100%',
+        margin: '24px auto',
+        padding: '0 24px',
+        boxSizing: 'border-box'
+      }}>
+        {/* Clean Flex Layout to prevent overlap */}
+        <div style={{
+          display: 'flex',
+          gap: '24px',
+          alignItems: 'flex-start',
+          width: '100%'
+        }}>
+          {/* Left Form: Fixed comfortable width */}
+          <div style={{
+            width: '380px',
+            flexShrink: 0
+          }}>
             <UploadDoc user={user} onUploadSuccess={fetchDocuments} />
-          </section>
-          <section style={layoutStyles.col}>
+          </div>
+
+          {/* Right Repository: Takes rest of the available width cleanly */}
+          <div style={{
+            flex: 1,
+            minWidth: 0
+          }}>
             <DocList
               documents={documents}
               search={search}
               setSearch={setSearch}
               onStatusUpdate={fetchDocuments}
             />
-          </section>
+          </div>
         </div>
       </main>
     </div>
