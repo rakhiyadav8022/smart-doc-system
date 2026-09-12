@@ -4,7 +4,6 @@ import Navbar from './components/Navbar';
 import UploadDoc from './components/UploadDoc';
 import DocList from './components/DocList';
 import Login from './components/Login';
-import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -19,10 +18,13 @@ function App() {
   }, []);
 
   const fetchDocuments = async () => {
-    if (!user) return;
+    const activeUser = user || JSON.parse(localStorage.getItem('doc_user') || '{}');
+    const userId = activeUser?.id || activeUser?._id;
+    if (!userId) return;
+
     try {
       const response = await axios.get(
-        `https://smart-doc-system.onrender.com/api/documents?userId=${user.id}&search=${search}`
+        `https://smart-doc-system.onrender.com/api/documents?userId=${userId}&search=${search}`
       );
       setDocuments(response.data);
     } catch (err) {
@@ -47,24 +49,61 @@ function App() {
     return <Login onLoginSuccess={(userData) => setUser(userData)} />;
   }
 
+  // Side-by-side Layout Styles
+  const layoutStyles = {
+    pageWrapper: {
+      backgroundColor: '#f1f5f9',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      fontFamily: 'Segoe UI, Roboto, sans-serif'
+    },
+    mainContainer: {
+      maxWidth: '1350px',
+      width: '100%',
+      margin: '25px auto',
+      padding: '0 20px',
+      boxSizing: 'border-box'
+    },
+    gridContainer: {
+      display: 'grid',
+      gridTemplateColumns: '430px 1fr', // Left: Form, Right: Repository
+      gap: '24px',
+      alignItems: 'flex-start'
+    },
+    leftCol: {
+      width: '100%'
+    },
+    rightCol: {
+      width: '100%',
+      minWidth: 0
+    }
+  };
+
   return (
-    <div className="app-layout">
+    <div style={layoutStyles.pageWrapper}>
+      {/* Top Navigation Bar */}
       <Navbar user={user} onLogout={handleLogout} />
-      <div className="main-wrapper">
-        <div className="content-grid">
-          <div className="left-panel">
+
+      {/* Side-by-Side 2-Column Grid */}
+      <main style={layoutStyles.mainContainer}>
+        <div style={layoutStyles.gridContainer}>
+          {/* Left Side: Upload / Digitize Form */}
+          <section style={layoutStyles.leftCol}>
             <UploadDoc user={user} onUploadSuccess={fetchDocuments} />
-          </div>
-          <div className="right-panel">
+          </section>
+
+          {/* Right Side: Central Document Repository */}
+          <section style={layoutStyles.rightCol}>
             <DocList
               documents={documents}
               search={search}
               setSearch={setSearch}
               onStatusUpdate={fetchDocuments}
             />
-          </div>
+          </section>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
