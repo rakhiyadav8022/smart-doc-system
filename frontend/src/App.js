@@ -49,7 +49,6 @@ function App() {
     return <Login onLoginSuccess={(userData) => setUser(userData)} />;
   }
 
-  // Side-by-side Layout Styles
   const layoutStyles = {
     pageWrapper: {
       backgroundColor: '#f1f5f9',
@@ -59,22 +58,19 @@ function App() {
       fontFamily: 'Segoe UI, Roboto, sans-serif'
     },
     mainContainer: {
-      maxWidth: '1350px',
+      maxWidth: '1300px',
       width: '100%',
-      margin: '25px auto',
+      margin: '20px auto',
       padding: '0 20px',
       boxSizing: 'border-box'
     },
     gridContainer: {
       display: 'grid',
-      gridTemplateColumns: '430px 1fr', // Left: Form, Right: Repository
-      gap: '24px',
-      alignItems: 'flex-start'
+      gridTemplateColumns: '400px 1fr', // Form fixed, Repository flexible
+      gap: '20px',
+      alignItems: 'start'
     },
-    leftCol: {
-      width: '100%'
-    },
-    rightCol: {
+    col: {
       width: '100%',
       minWidth: 0
     }
@@ -82,19 +78,13 @@ function App() {
 
   return (
     <div style={layoutStyles.pageWrapper}>
-      {/* Top Navigation Bar */}
       <Navbar user={user} onLogout={handleLogout} />
-
-      {/* Side-by-Side 2-Column Grid */}
       <main style={layoutStyles.mainContainer}>
         <div style={layoutStyles.gridContainer}>
-          {/* Left Side: Upload / Digitize Form */}
-          <section style={layoutStyles.leftCol}>
+          <section style={layoutStyles.col}>
             <UploadDoc user={user} onUploadSuccess={fetchDocuments} />
           </section>
-
-          {/* Right Side: Central Document Repository */}
-          <section style={layoutStyles.rightCol}>
+          <section style={layoutStyles.col}>
             <DocList
               documents={documents}
               search={search}
