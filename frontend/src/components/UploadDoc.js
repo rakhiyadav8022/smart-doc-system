@@ -29,7 +29,7 @@ function UploadDoc({ user, onUploadSuccess }) {
         ...formData,
         userId: user.id
       });
-      alert('Document securely digitized and archived!');
+      alert('Document saved successfully!');
       setFormData({ title: '', department: '', category: '', fileData: '' });
       onUploadSuccess();
     } catch (err) {
@@ -40,40 +40,45 @@ function UploadDoc({ user, onUploadSuccess }) {
   };
 
   return (
-    <div className="card">
-      <h3>📑 Digitize New Record</h3>
-      <p className="card-subtitle">Saved exclusively to {user.name}'s secure vault</p>
+    <div className="card upload-card-box">
+      <div className="upload-header">
+        <h3 className="upload-title">📑 Digitize New Record</h3>
+        <p className="upload-subtitle">Saved exclusively to {user?.name}'s secure vault</p>
+      </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Document Title / Subject</label>
+      <form onSubmit={handleSubmit} className="custom-gov-form">
+        <div className="form-group-item">
+          <label className="field-label">Document Title / Subject</label>
           <input
             type="text"
             name="title"
-            placeholder="e.g., Aadhaar Card, Land Deed 2026"
+            className="field-input"
+            placeholder="e.g., Aadhaar Card, Land Revenue Deed"
             value={formData.title}
             onChange={handleChange}
             required
           />
         </div>
 
-        <div className="form-group">
-          <label>Department</label>
+        <div className="form-group-item">
+          <label className="field-label">Department</label>
           <input
             type="text"
             name="department"
-            placeholder="e.g., UIDAI, Revenue, Transport"
+            className="field-input"
+            placeholder="e.g., UIDAI, Transport, Revenue"
             value={formData.department}
             onChange={handleChange}
             required
           />
         </div>
 
-        <div className="form-group">
-          <label>Document Category</label>
+        <div className="form-group-item">
+          <label className="field-label">Document Category</label>
           <input
             type="text"
             name="category"
+            className="field-input"
             placeholder="e.g., Identity, Certificate, Order"
             value={formData.category}
             onChange={handleChange}
@@ -81,20 +86,21 @@ function UploadDoc({ user, onUploadSuccess }) {
           />
         </div>
 
-        <div className="form-group">
-          <label>Extracted / Scanned Content</label>
+        <div className="form-group-item">
+          <label className="field-label">Extracted / Scanned Content</label>
           <textarea
-            rows="4"
+            rows="5"
             name="fileData"
-            placeholder="Paste digitized text, card details, or certificate content..."
+            className="field-textarea"
+            placeholder="Paste digitized text, card details, or certificate details..."
             value={formData.fileData}
             onChange={handleChange}
             required
           />
         </div>
 
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Digitizing...' : 'Save to Personal Registry'}
+        <button type="submit" className="btn-submit-form" disabled={loading}>
+          {loading ? 'Digitizing...' : '📥 Save to Personal Registry'}
         </button>
       </form>
     </div>
