@@ -77,11 +77,31 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
     pdf.save(`${(doc.title || 'document').replace(/[^a-zA-Z0-9]/g, '_')}_document.pdf`);
   };
 
+  // Helper to extract identifier numbers from the entered text
+  const extractCardNumber = (text) => {
+    if (!text) return 'Identity Number Not Specified';
+    
+    // Check for explicit "aadhar no : 1234..." or standard 12 digit sequence
+    const explicitMatch = text.match(/(?:aadhar|adhaar|aadhaar|card|id)?\s*(?:no\.?|number|num)?[:\s-]*([0-9\s]{10,16})/i);
+    if (explicitMatch && explicitMatch[1] && explicitMatch[1].replace(/\s/g, '').length >= 10) {
+      return explicitMatch[1].trim();
+    }
+
+    // Fallback: Check for any sequence of 10 to 12 digits
+    const digitsOnly = text.match(/\b\d{4}\s?\d{4}\s?\d{4}\b/) || text.match(/\b\d{10,12}\b/);
+    if (digitsOnly) {
+      return digitsOnly[0];
+    }
+
+    return 'Verified Citizen Identity';
+  };
+
   const renderDocumentFormat = (doc) => {
     const text = `${doc.title} ${doc.category} ${doc.department}`.toLowerCase();
 
-    // Aadhaar Layout
     if (text.includes('aadhar') || text.includes('aadhaar') || text.includes('uidai')) {
+      const cardNumber = extractCardNumber(doc.fileData);
+
       return (
         <div style={{
           backgroundColor: '#ffffff',
@@ -170,7 +190,7 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
             padding: '8px 0',
             borderTop: '1px dashed #cbd5e1'
           }}>
-            XXXX - XXXX - XXXX
+            {cardNumber}
           </div>
 
           <div style={{
@@ -187,7 +207,6 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
       );
     }
 
-    // Default Document Card
     return (
       <div style={{
         backgroundColor: '#ffffff',
