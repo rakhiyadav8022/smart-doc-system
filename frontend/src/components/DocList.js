@@ -76,14 +76,22 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
     pdf.save(`${(doc.title || 'document').replace(/[^a-zA-Z0-9]/g, '_')}_document.pdf`);
   };
 
+  // 12-digit number extraction prioritize karein
   const extractCardNumber = (text) => {
-    if (!text) return 'Identity Number Not Specified';
-    const explicitMatch = text.match(/(?:aadhar|adhaar|aadhaar|card|id)?\s*(?:no\.?|number|num)?[:\s-]*([0-9\s]{10,16})/i);
-    if (explicitMatch && explicitMatch[1] && explicitMatch[1].replace(/\s/g, '').length >= 10) {
-      return explicitMatch[1].trim();
+    if (!text) return 'Verified Citizen Identity';
+
+    // Pehle specific 12 digit format dhundo (XXXX XXXX XXXX ya XXXXXXXXXXXX)
+    const twelveDigitMatch = text.match(/(?:aadhar|adhaar|aadhaar|uid)?\s*(?:no\.?|number|num)?[:\s-]*(\d{4}\s?\d{4}\s?\d{4})/i);
+    if (twelveDigitMatch && twelveDigitMatch[1]) {
+      return twelveDigitMatch[1];
     }
-    const digitsOnly = text.match(/\b\d{4}\s?\d{4}\s?\d{4}\b/) || text.match(/\b\d{10,12}\b/);
-    return digitsOnly ? digitsOnly[0] : 'Verified Citizen Identity';
+
+    const simple12Digits = text.match(/\b\d{12}\b/);
+    if (simple12Digits) {
+      return simple12Digits[0].replace(/(\d{4})(?=\d)/g, '$1 ');
+    }
+
+    return 'Verified Citizen Identity';
   };
 
   const renderDocumentFormat = (doc) => {
@@ -97,10 +105,11 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
           backgroundColor: '#ffffff',
           border: '1px solid #cbd5e1',
           borderRadius: '8px',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
           overflow: 'hidden',
           marginTop: '10px',
-          fontFamily: 'Arial, sans-serif'
+          maxWidth: '100%',
+          boxSizing: 'border-box'
         }}>
           <div style={{
             height: '4px',
@@ -116,10 +125,10 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
             background: '#f8fafc',
             borderBottom: '1px solid #e2e8f0'
           }}>
-            <h4 style={{ margin: 0, color: '#1e3a8a', fontSize: '12px', fontWeight: '700' }}>
+            <h4 style={{ margin: 0, color: '#1e3a8a', fontSize: '11px', fontWeight: '700' }}>
               भारत सरकार | Government of India
             </h4>
-            <span style={{ fontSize: '10px', color: '#64748b' }}>UIDAI Secure</span>
+            <span style={{ fontSize: '10px', color: '#64748b' }}>UIDAI Secure Card</span>
           </div>
 
           <div style={{
@@ -127,32 +136,38 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
             gap: '12px',
             padding: '12px',
             alignItems: 'center',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
+            boxSizing: 'border-box'
           }}>
             <div style={{
-              width: '60px',
-              height: '75px',
+              width: '55px',
+              height: '70px',
               backgroundColor: '#e2e8f0',
               borderRadius: '4px',
               border: '1px solid #cbd5e1',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '26px',
+              fontSize: '24px',
               flexShrink: 0
             }}>
               👤
             </div>
 
-            <div style={{ flex: 1, fontSize: '12px', color: '#1e293b', lineHeight: '1.5' }}>
-              <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}>
+            <div style={{ flex: 1, minWidth: 0, fontSize: '12px', color: '#1e293b', lineHeight: '1.5' }}>
+              <pre style={{
+                margin: 0,
+                fontFamily: 'inherit',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word'
+              }}>
                 {doc.fileData}
               </pre>
             </div>
 
             <div style={{
-              width: '50px',
-              height: '50px',
+              width: '45px',
+              height: '45px',
               backgroundColor: '#0f172a',
               color: '#ffffff',
               borderRadius: '4px',
@@ -160,7 +175,7 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '8px',
+              fontSize: '7px',
               fontWeight: '700',
               letterSpacing: '0.5px',
               flexShrink: 0
@@ -204,12 +219,13 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
         borderLeft: '4px solid #1e40af',
         borderRadius: '6px',
         padding: '10px 12px',
-        marginTop: '8px'
+        marginTop: '8px',
+        boxSizing: 'border-box'
       }}>
         <div style={{ fontSize: '12px', fontWeight: '700', color: '#1e40af', marginBottom: '4px' }}>
           🏛️ {doc.department} — {doc.title}
         </div>
-        <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap', fontSize: '12px', color: '#334155' }}>
+        <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '12px', color: '#334155' }}>
           {doc.fileData}
         </pre>
       </div>
@@ -221,19 +237,20 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
       backgroundColor: '#ffffff',
       border: '1px solid #cbd5e1',
       borderRadius: '12px',
-      padding: '18px 20px', // Reduced padding
-      boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+      padding: '16px 18px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
       boxSizing: 'border-box',
       width: '100%',
-      fontFamily: 'Segoe UI, Roboto, sans-serif'
+      maxWidth: '100%',
+      overflow: 'hidden'
     }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '14px'
+        marginBottom: '12px'
       }}>
-        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>
+        <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>
           🔍 Central Document Repository
         </h3>
         <span style={{
@@ -266,9 +283,9 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
         }}
       />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {documents.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8', fontSize: '13px' }}>
+          <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8', fontSize: '13px' }}>
             No matching records found.
           </div>
         ) : (
@@ -278,12 +295,13 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
               style={{
                 border: '1px solid #e2e8f0',
                 borderRadius: '8px',
-                padding: '14px',
-                backgroundColor: '#ffffff'
+                padding: '12px',
+                backgroundColor: '#ffffff',
+                boxSizing: 'border-box'
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <span style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{doc.title}</span>
+                <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>{doc.title}</span>
                 <span style={{
                   backgroundColor: '#f1f5f9',
                   color: '#475569',
@@ -303,7 +321,7 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
 
               {renderDocumentFormat(doc)}
 
-              <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
                 <button
                   type="button"
                   onClick={() => handleDelete(doc._id)}

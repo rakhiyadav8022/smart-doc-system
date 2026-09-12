@@ -51,7 +51,7 @@ function App() {
 
   return (
     <div style={{
-      backgroundColor: '#f1f5f9',
+      backgroundColor: '#f8fafc',
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
@@ -60,32 +60,27 @@ function App() {
       <Navbar user={user} onLogout={handleLogout} />
 
       <main style={{
-        maxWidth: '1280px',
+        maxWidth: '1320px',
         width: '100%',
         margin: '24px auto',
-        padding: '0 24px',
+        padding: '0 20px',
         boxSizing: 'border-box'
       }}>
-        {/* Clean Flex Layout to prevent overlap */}
+        {/* Strict CSS Grid - Har column ki boundary locked hai */}
         <div style={{
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: '360px minmax(0, 1fr)',
           gap: '24px',
-          alignItems: 'flex-start',
+          alignItems: 'start',
           width: '100%'
         }}>
-          {/* Left Form: Fixed comfortable width */}
-          <div style={{
-            width: '380px',
-            flexShrink: 0
-          }}>
+          {/* Left Column: Form */}
+          <div style={{ width: '100%', position: 'relative', margin: 0 }}>
             <UploadDoc user={user} onUploadSuccess={fetchDocuments} />
           </div>
 
-          {/* Right Repository: Takes rest of the available width cleanly */}
-          <div style={{
-            flex: 1,
-            minWidth: 0
-          }}>
+          {/* Right Column: Repository */}
+          <div style={{ width: '100%', minWidth: 0, position: 'relative', margin: 0 }}>
             <DocList
               documents={documents}
               search={search}
