@@ -77,155 +77,251 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
     pdf.save(`${(doc.title || 'document').replace(/[^a-zA-Z0-9]/g, '_')}_document.pdf`);
   };
 
-  // Helper: Identify document type for rendering custom cards
   const renderDocumentFormat = (doc) => {
     const text = `${doc.title} ${doc.category} ${doc.department}`.toLowerCase();
 
-    // 1. Aadhaar Card
+    // Aadhaar Layout
     if (text.includes('aadhar') || text.includes('aadhaar') || text.includes('uidai')) {
       return (
-        <div className="doc-preview-wrapper aadhar-card-view">
-          <div className="aadhar-top-strip"></div>
-          <div className="aadhar-header">
-            <h4>भारत सरकार | Government of India</h4>
-            <span style={{ fontSize: '10px', color: '#64748b' }}>UIDAI Secure Card</span>
+        <div style={{
+          backgroundColor: '#ffffff',
+          border: '1.5px solid #cbd5e1',
+          borderRadius: '10px',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.06)',
+          overflow: 'hidden',
+          marginTop: '12px',
+          fontFamily: 'Arial, sans-serif'
+        }}>
+          <div style={{
+            height: '6px',
+            background: 'linear-gradient(90deg, #ff9933 33.33%, #ffffff 33.33%, #ffffff 66.66%, #138808 66.66%)',
+            borderBottom: '1px solid #e2e8f0'
+          }}></div>
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 16px',
+            background: '#f8fafc',
+            borderBottom: '1px solid #e2e8f0'
+          }}>
+            <h4 style={{ margin: 0, color: '#1e3a8a', fontSize: '13px', fontWeight: '700' }}>
+              भारत सरकार | Government of India
+            </h4>
+            <span style={{ fontSize: '11px', color: '#64748b' }}>UIDAI Secure Card</span>
           </div>
-          <div className="aadhar-body-grid">
-            <div className="aadhar-photo-box">👤</div>
-            <div className="aadhar-details">
+
+          <div style={{
+            display: 'flex',
+            gap: '16px',
+            padding: '16px',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{
+              width: '75px',
+              height: '90px',
+              backgroundColor: '#e2e8f0',
+              borderRadius: '6px',
+              border: '1px solid #cbd5e1',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '32px',
+              flexShrink: 0
+            }}>
+              👤
+            </div>
+
+            <div style={{ flex: 1, fontSize: '13px', color: '#1e293b', lineHeight: '1.6' }}>
               <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}>
                 {doc.fileData}
               </pre>
             </div>
-            <div className="aadhar-qr-box">SECURE<br />QR</div>
-          </div>
-          <div className="aadhar-number-bar">XXXX - XXXX - XXXX</div>
-          <div className="aadhar-footer-text">मेरा आधार, मेरी पहचान</div>
-        </div>
-      );
-    }
 
-    // 2. PAN Card
-    if (text.includes('pan') || text.includes('income tax')) {
-      return (
-        <div className="doc-preview-wrapper pan-card-view">
-          <div className="pan-header">
-            <h4>INCOME TAX DEPARTMENT | GOVT. OF INDIA</h4>
-            <span style={{ fontSize: '11px' }}>PERMANENT ACCOUNT CARD</span>
-          </div>
-          <div className="pan-body">
-            <div className="pan-photo-box">👤</div>
-            <div className="pan-info">
-              <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}>
-                {doc.fileData}
-              </pre>
-              <div className="pan-signature-bar">Digitally Signed Holder</div>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              backgroundColor: '#0f172a',
+              color: '#ffffff',
+              borderRadius: '6px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '10px',
+              fontWeight: '700',
+              letterSpacing: '1px',
+              flexShrink: 0
+            }}>
+              <span>SECURE</span>
+              <span>QR</span>
             </div>
           </div>
-        </div>
-      );
-    }
 
-    // 3. Driving License / Vehicle RC
-    if (text.includes('license') || text.includes('licence') || text.includes('driving') || text.includes('transport') || text.includes('rc')) {
-      return (
-        <div className="doc-preview-wrapper dl-card-view">
-          <div className="dl-header">
-            <h4>UNION OF INDIA | DRIVING LICENCE</h4>
-            <span style={{ fontSize: '11px' }}>FORM 7 SMART CARD</span>
+          <div style={{
+            textAlign: 'center',
+            fontSize: '15px',
+            fontWeight: '700',
+            letterSpacing: '3px',
+            color: '#0f172a',
+            backgroundColor: '#f8fafc',
+            padding: '8px 0',
+            borderTop: '1px dashed #cbd5e1'
+          }}>
+            XXXX - XXXX - XXXX
           </div>
-          <div className="dl-body">
-            <div className="aadhar-photo-box">👤</div>
-            <div style={{ fontSize: '12px', color: '#0f172a' }}>
-              <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}>
-                {doc.fileData}
-              </pre>
-            </div>
-            <div className="dl-chip" title="Smart Chip"></div>
-          </div>
-        </div>
-      );
-    }
 
-    // 4. Certificates / Marks Sheet / Degrees
-    if (text.includes('certificate') || text.includes('marksheet') || text.includes('degree') || text.includes('diploma') || text.includes('education')) {
-      return (
-        <div className="doc-preview-wrapper cert-card-view">
-          <div className="cert-badge">🏅</div>
-          <div className="cert-title">CERTIFICATE OF RECOGNITION</div>
-          <div className="cert-content">
-            <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}>
-              {doc.fileData}
-            </pre>
+          <div style={{
+            textAlign: 'center',
+            fontSize: '11px',
+            color: '#b91c1c',
+            padding: '6px',
+            fontWeight: '700',
+            backgroundColor: '#ffffff'
+          }}>
+            मेरा आधार, मेरी पहचान
           </div>
         </div>
       );
     }
 
-    // 5. Default Government Order / Land Record / Deeds
+    // Default Document Card
     return (
-      <div className="doc-preview-wrapper order-card-view">
-        <span className="order-stamp">OFFICIAL RECORD</span>
-        <div className="order-heading">🏛️ {doc.department} - {doc.title}</div>
-        <div className="order-body">
-          <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap' }}>
-            {doc.fileData}
-          </pre>
+      <div style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #cbd5e1',
+        borderLeft: '5px solid #1e40af',
+        borderRadius: '8px',
+        padding: '14px',
+        marginTop: '10px'
+      }}>
+        <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e40af', marginBottom: '6px' }}>
+          🏛️ {doc.department} — {doc.title}
         </div>
+        <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap', fontSize: '13px', color: '#334155' }}>
+          {doc.fileData}
+        </pre>
       </div>
     );
   };
 
   return (
-    <div className="card">
-      <div className="card-header-flex">
-        <h3>🔍 Central Document Repository</h3>
-        <span className="count-pill">{documents.length} Records</span>
+    <div style={{
+      backgroundColor: '#ffffff',
+      border: '1px solid #cbd5e1',
+      borderRadius: '12px',
+      padding: '24px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+      fontFamily: 'Segoe UI, Roboto, sans-serif'
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '16px'
+      }}>
+        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>
+          🔍 Central Document Repository
+        </h3>
+        <span style={{
+          backgroundColor: '#e0f2fe',
+          color: '#0369a1',
+          fontSize: '12px',
+          fontWeight: '700',
+          padding: '4px 10px',
+          borderRadius: '16px'
+        }}>
+          {documents.length} Records
+        </span>
       </div>
 
       <input
         type="text"
-        className="search-input"
         placeholder="Search documents by Title or Department..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+        style={{
+          width: '100%',
+          boxSizing: 'border-box',
+          padding: '10px 14px',
+          borderRadius: '8px',
+          border: '1.5px solid #cbd5e1',
+          fontSize: '14px',
+          outline: 'none',
+          backgroundColor: '#f8fafc',
+          marginBottom: '20px'
+        }}
       />
 
-      <div className="doc-scroll-area">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {documents.length === 0 ? (
-          <div className="empty-state">No matching documents found.</div>
+          <div style={{ textAlign: 'center', padding: '30px', color: '#94a3b8', fontSize: '14px' }}>
+            No matching records found.
+          </div>
         ) : (
           documents.map((doc) => (
-            <div key={doc._id} className="doc-card">
-              <div className="doc-header">
-                <span className="doc-title">{doc.title}</span>
-                <span className="count-pill" style={{ background: '#f1f5f9', color: '#475569' }}>
+            <div
+              key={doc._id}
+              style={{
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                padding: '16px',
+                backgroundColor: '#ffffff'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>{doc.title}</span>
+                <span style={{
+                  backgroundColor: '#f1f5f9',
+                  color: '#475569',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  padding: '3px 8px',
+                  borderRadius: '6px'
+                }}>
                   {doc.category}
                 </span>
               </div>
 
-              <div className="doc-meta">
+              <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: '#64748b', marginBottom: '10px' }}>
                 <span>🏢 <strong>Dept:</strong> {doc.department}</span>
                 <span>🕒 {new Date(doc.uploadedAt).toLocaleDateString()}</span>
               </div>
 
-              {/* Dynamic Design Output based on Document Type */}
               {renderDocumentFormat(doc)}
 
-              <div className="doc-actions" style={{ marginTop: '14px' }}>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
                 <button
                   type="button"
                   onClick={() => handleDelete(doc._id)}
-                  className="btn"
-                  style={{ backgroundColor: '#ef4444', color: '#ffffff' }}
+                  style={{
+                    backgroundColor: '#ef4444',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
                 >
                   🗑️ Delete
                 </button>
                 <button
                   type="button"
                   onClick={() => handleDownloadPDF(doc)}
-                  className="btn"
-                  style={{ backgroundColor: '#1d4ed8', color: '#ffffff' }}
+                  style={{
+                    backgroundColor: '#1d4ed8',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
                 >
                   📥 Download PDF
                 </button>
