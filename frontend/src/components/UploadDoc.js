@@ -27,7 +27,7 @@ function UploadDoc({ user, onUploadSuccess }) {
     try {
       await axios.post(`${API_URL}/api/documents`, {
         ...formData,
-        userId: user.id
+        userId: user?.id || user?._id
       });
       alert('Document saved successfully!');
       setFormData({ title: '', department: '', category: '', fileData: '' });
@@ -39,20 +39,103 @@ function UploadDoc({ user, onUploadSuccess }) {
     }
   };
 
+  // Dedicated Inline Styles to bypass CSS cache/override issues
+  const styles = {
+    container: {
+      backgroundColor: '#ffffff',
+      border: '1px solid #cbd5e1',
+      borderRadius: '12px',
+      padding: '24px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
+      maxWidth: '420px',
+      width: '100%',
+      fontFamily: 'Segoe UI, Roboto, sans-serif'
+    },
+    header: {
+      marginBottom: '18px',
+      borderBottom: '1px solid #f1f5f9',
+      paddingBottom: '10px'
+    },
+    title: {
+      fontSize: '18px',
+      fontWeight: '700',
+      color: '#0f172a',
+      margin: '0 0 4px 0'
+    },
+    subtitle: {
+      fontSize: '12px',
+      color: '#64748b',
+      margin: 0
+    },
+    form: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '14px'
+    },
+    fieldGroup: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '5px'
+    },
+    label: {
+      fontSize: '11px',
+      fontWeight: '700',
+      color: '#334155',
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px'
+    },
+    input: {
+      width: '100%',
+      boxSizing: 'border-box',
+      padding: '10px 12px',
+      borderRadius: '6px',
+      border: '1.5px solid #cbd5e1',
+      fontSize: '13px',
+      backgroundColor: '#f8fafc',
+      color: '#0f172a',
+      outline: 'none'
+    },
+    textarea: {
+      width: '100%',
+      boxSizing: 'border-box',
+      padding: '10px 12px',
+      borderRadius: '6px',
+      border: '1.5px solid #cbd5e1',
+      fontSize: '13px',
+      backgroundColor: '#f8fafc',
+      color: '#0f172a',
+      outline: 'none',
+      fontFamily: 'inherit',
+      resize: 'vertical'
+    },
+    button: {
+      width: '100%',
+      backgroundColor: '#1d4ed8',
+      color: '#ffffff',
+      padding: '12px',
+      borderRadius: '6px',
+      border: 'none',
+      fontSize: '14px',
+      fontWeight: '700',
+      cursor: 'pointer',
+      marginTop: '6px'
+    }
+  };
+
   return (
-    <div className="card upload-card-box">
-      <div className="upload-header">
-        <h3 className="upload-title">📑 Digitize New Record</h3>
-        <p className="upload-subtitle">Saved exclusively to {user?.name}'s secure vault</p>
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <h3 style={styles.title}>📑 Digitize New Record</h3>
+        <p style={styles.subtitle}>Saved exclusively to secure vault</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="custom-gov-form">
-        <div className="form-group-item">
-          <label className="field-label">Document Title / Subject</label>
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <div style={styles.fieldGroup}>
+          <label style={styles.label}>Document Title / Subject</label>
           <input
             type="text"
             name="title"
-            className="field-input"
+            style={styles.input}
             placeholder="e.g., Aadhaar Card, Land Revenue Deed"
             value={formData.title}
             onChange={handleChange}
@@ -60,12 +143,12 @@ function UploadDoc({ user, onUploadSuccess }) {
           />
         </div>
 
-        <div className="form-group-item">
-          <label className="field-label">Department</label>
+        <div style={styles.fieldGroup}>
+          <label style={styles.label}>Department</label>
           <input
             type="text"
             name="department"
-            className="field-input"
+            style={styles.input}
             placeholder="e.g., UIDAI, Transport, Revenue"
             value={formData.department}
             onChange={handleChange}
@@ -73,12 +156,12 @@ function UploadDoc({ user, onUploadSuccess }) {
           />
         </div>
 
-        <div className="form-group-item">
-          <label className="field-label">Document Category</label>
+        <div style={styles.fieldGroup}>
+          <label style={styles.label}>Document Category</label>
           <input
             type="text"
             name="category"
-            className="field-input"
+            style={styles.input}
             placeholder="e.g., Identity, Certificate, Order"
             value={formData.category}
             onChange={handleChange}
@@ -86,12 +169,12 @@ function UploadDoc({ user, onUploadSuccess }) {
           />
         </div>
 
-        <div className="form-group-item">
-          <label className="field-label">Extracted / Scanned Content</label>
+        <div style={styles.fieldGroup}>
+          <label style={styles.label}>Extracted / Scanned Content</label>
           <textarea
             rows="5"
             name="fileData"
-            className="field-textarea"
+            style={styles.textarea}
             placeholder="Paste digitized text, card details, or certificate details..."
             value={formData.fileData}
             onChange={handleChange}
@@ -99,7 +182,7 @@ function UploadDoc({ user, onUploadSuccess }) {
           />
         </div>
 
-        <button type="submit" className="btn-submit-form" disabled={loading}>
+        <button type="submit" style={styles.button} disabled={loading}>
           {loading ? 'Digitizing...' : '📥 Save to Personal Registry'}
         </button>
       </form>

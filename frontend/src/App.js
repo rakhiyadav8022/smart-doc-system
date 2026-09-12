@@ -48,14 +48,14 @@ function App() {
   }
 
   return (
-    <div className="app-container">
+    <div className="app-layout">
       <Navbar user={user} onLogout={handleLogout} />
-      <main className="main-content">
-        <div className="dashboard-grid">
-          <div className="grid-col left-col">
+      <div className="main-wrapper">
+        <div className="content-grid">
+          <div className="left-panel">
             <UploadDoc user={user} onUploadSuccess={fetchDocuments} />
           </div>
-          <div className="grid-col right-col">
+          <div className="right-panel">
             <DocList
               documents={documents}
               search={search}
@@ -64,7 +64,7 @@ function App() {
             />
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
