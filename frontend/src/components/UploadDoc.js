@@ -10,19 +10,26 @@ function UploadDoc({ user, onUploadSuccess }) {
   });
   const [loading, setLoading] = useState(false);
 
+  const API_URL = 'https://smart-doc-system.onrender.com';
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.title || !formData.fileData) {
+      alert('Please fill Title and Content');
+      return;
+    }
+
     setLoading(true);
     try {
-      await axios.post('https://smart-doc-system.onrender.com/api/documents', {
+      await axios.post(`${API_URL}/api/documents`, {
         ...formData,
         userId: user.id
       });
-      alert('Document saved successfully in your personal vault!');
+      alert('Document securely digitized and archived!');
       setFormData({ title: '', department: '', category: '', fileData: '' });
       onUploadSuccess();
     } catch (err) {
@@ -34,15 +41,16 @@ function UploadDoc({ user, onUploadSuccess }) {
 
   return (
     <div className="card">
-      <h3>📄 Digitize New Record</h3>
-      <p className="card-subtitle">Saved exclusively to {user.name}'s vault</p>
+      <h3>📑 Digitize New Record</h3>
+      <p className="card-subtitle">Saved exclusively to {user.name}'s secure vault</p>
+
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Document Title / Subject</label>
           <input
             type="text"
             name="title"
-            placeholder="e.g., Land Revenue Circular 2026"
+            placeholder="e.g., Aadhaar Card, Land Deed 2026"
             value={formData.title}
             onChange={handleChange}
             required
@@ -54,7 +62,7 @@ function UploadDoc({ user, onUploadSuccess }) {
           <input
             type="text"
             name="department"
-            placeholder="e.g., Revenue, Transport, UIDAI"
+            placeholder="e.g., UIDAI, Revenue, Transport"
             value={formData.department}
             onChange={handleChange}
             required
@@ -66,7 +74,7 @@ function UploadDoc({ user, onUploadSuccess }) {
           <input
             type="text"
             name="category"
-            placeholder="e.g., Identity, Registry, Certificate"
+            placeholder="e.g., Identity, Certificate, Order"
             value={formData.category}
             onChange={handleChange}
             required
@@ -76,9 +84,9 @@ function UploadDoc({ user, onUploadSuccess }) {
         <div className="form-group">
           <label>Extracted / Scanned Content</label>
           <textarea
-            name="fileData"
             rows="4"
-            placeholder="Paste digitized text or certificate details..."
+            name="fileData"
+            placeholder="Paste digitized text, card details, or certificate content..."
             value={formData.fileData}
             onChange={handleChange}
             required
@@ -86,7 +94,7 @@ function UploadDoc({ user, onUploadSuccess }) {
         </div>
 
         <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Saving to Database...' : 'Save to Personal Registry'}
+          {loading ? 'Digitizing...' : 'Save to Personal Registry'}
         </button>
       </form>
     </div>
