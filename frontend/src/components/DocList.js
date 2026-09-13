@@ -62,12 +62,24 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
     pdf.setDrawColor(200);
     pdf.line(15, 80, 195, 80);
 
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Digitized / Extracted Content:', 20, 90);
+    let nextY = 90;
+    if (doc.fileData) {
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Digitized Details:', 20, nextY);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      const splitText = pdf.splitTextToSize(doc.fileData || '', 170);
+      pdf.text(splitText, 20, nextY + 8);
+      nextY += 15 + splitText.length * 5;
+    }
 
-    pdf.setFontSize(10);
-    const splitText = pdf.splitTextToSize(doc.fileData || '', 170);
-    pdf.text(splitText, 20, 98);
+    if (doc.imageUrl) {
+      try {
+        pdf.addImage(doc.imageUrl, 'JPEG', 35, nextY, 140, 100);
+      } catch (e) {
+        console.error('PDF image render error:', e);
+      }
+    }
 
     pdf.setFontSize(9);
     pdf.setTextColor(130);
@@ -77,7 +89,7 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
   };
 
   const extractCardNumber = (text) => {
-    if (!text) return 'Verified Citizen Identity';
+    if (!text) return 'Verified Record';
     const twelveDigitMatch = text.match(/(?:aadhar|adhaar|aadhaar|uid)?\s*(?:no\.?|number|num)?[:\s-]*(\d{4}\s?\d{4}\s?\d{4})/i);
     if (twelveDigitMatch && twelveDigitMatch[1]) {
       return twelveDigitMatch[1];
@@ -86,19 +98,20 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
     if (simple12Digits) {
       return simple12Digits[0].replace(/(\d{4})(?=\d)/g, '$1 ');
     }
-    return 'Verified Citizen Identity';
+    return 'Verified Record';
   };
 
   const renderDocumentFormat = (doc) => {
     const text = `${doc.title} ${doc.category} ${doc.department}`.toLowerCase();
 
+    // Aadhaar Layout
     if (text.includes('aadhar') || text.includes('aadhaar') || text.includes('uidai')) {
       const cardNumber = extractCardNumber(doc.fileData);
 
       return (
         <div style={{
           backgroundColor: '#ffffff',
-          border: '1px solid #cbd5e1',
+          border: '1.5px solid #cbd5e1',
           borderRadius: '8px',
           boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
           overflow: 'hidden',
@@ -144,9 +157,14 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '24px',
+              overflow: 'hidden',
               flexShrink: 0
             }}>
-              👤
+              {doc.imageUrl ? (
+                <img src={doc.imageUrl} alt="Document" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                '👤'
+              )}
             </div>
 
             <div style={{ flex: 1, minWidth: 0, fontSize: '12px', color: '#1e293b', lineHeight: '1.5' }}>
@@ -207,22 +225,40 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
       );
     }
 
+    // Default Layout (Educational Marksheet / Certificates)
     return (
       <div style={{
         backgroundColor: '#ffffff',
         border: '1px solid #cbd5e1',
         borderLeft: '4px solid #1e40af',
         borderRadius: '6px',
-        padding: '10px 12px',
+        padding: '12px',
         marginTop: '8px',
         boxSizing: 'border-box'
       }}>
-        <div style={{ fontSize: '12px', fontWeight: '700', color: '#1e40af', marginBottom: '4px' }}>
+        <div style={{ fontSize: '12px', fontWeight: '700', color: '#1e40af', marginBottom: '6px' }}>
           🏛️ {doc.department} — {doc.title}
         </div>
-        <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '12px', color: '#334155' }}>
-          {doc.fileData}
-        </pre>
+        {doc.fileData && (
+          <pre style={{ margin: '0 0 10px 0', fontFamily: 'inherit', whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '12px', color: '#334155' }}>
+            {doc.fileData}
+          </pre>
+        )}
+        {doc.imageUrl && (
+          <div style={{ marginTop: '8px', textAlign: 'center' }}>
+            <img
+              src={doc.imageUrl}
+              alt="Attached Marksheet"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '260px',
+                borderRadius: '6px',
+                border: '1px solid #e2e8f0',
+                objectFit: 'contain'
+              }}
+            />
+          </div>
+        )}
       </div>
     );
   };

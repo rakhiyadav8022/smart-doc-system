@@ -5,9 +5,10 @@ require('dotenv').config();
 
 const app = express();
 
-// Middlewares
+// Increase JSON body limit for Base64 image uploads
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/smart-doc-system';
@@ -17,8 +18,6 @@ mongoose
   .catch((err) => console.error('MongoDB connection error:', err));
 
 // --- Schemas & Models ---
-
-// User Schema
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -27,21 +26,19 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// Document Schema
 const documentSchema = new mongoose.Schema({
   userId: { type: String, required: true },
   title: { type: String, required: true },
   department: { type: String, default: 'General' },
   category: { type: String, default: 'General' },
-  fileData: { type: String, required: true },
+  fileData: { type: String, default: '' },
+  imageUrl: { type: String, default: '' }, // Store Base64 Image string
   uploadedAt: { type: Date, default: Date.now }
 });
 
 const Document = mongoose.model('Document', documentSchema);
 
 // --- Auth Routes ---
-
-// Register Route
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -49,9 +46,15 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists with this email' });
+    let user = await User.findOne({ email });
+    if (user) {
+      user.password = password;
+      user.name = name;
+      await user.save();
+      return res.status(200).json({
+        message: 'Password updated successfully! Please login.',
+        user: { id: user._id, name: user.name, email: user.email }
+      });
     }
 
     const newUser = new User({ name, email, password });
@@ -66,7 +69,6 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-// Login Route
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -90,13 +92,10 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // --- Document Routes ---
-
-// Health Check
 app.get('/', (req, res) => {
   res.send('Smart Document System API is Running.');
 });
 
-// GET Documents
 app.get('/api/documents', async (req, res) => {
   try {
     const { userId, search } = req.query;
@@ -118,15 +117,22 @@ app.get('/api/documents', async (req, res) => {
   }
 });
 
-// POST Document
 app.post('/api/documents', async (req, res) => {
   try {
-    const { userId, title, department, category, fileData } = req.body;
-    if (!userId || !title || !fileData) {
-      return res.status(400).json({ error: 'Required fields missing' });
+    const { userId, title, department, category, fileData, imageUrl } = req.body;
+    if (!userId || !title) {
+      return res.status(400).json({ error: 'Title and User are required' });
     }
 
-    const newDoc = new Document({ userId, title, department, category, fileData });
+    const newDoc = new Document({
+      userId,
+      title,
+      department,
+      category,
+      fileData: fileData || '',
+      imageUrl: imageUrl || ''
+    });
+
     const savedDoc = await newDoc.save();
     res.status(201).json(savedDoc);
   } catch (err) {
@@ -134,7 +140,6 @@ app.post('/api/documents', async (req, res) => {
   }
 });
 
-// DELETE Document
 app.delete('/api/documents/:id', async (req, res) => {
   try {
     const deletedDoc = await Document.findByIdAndDelete(req.params.id);
