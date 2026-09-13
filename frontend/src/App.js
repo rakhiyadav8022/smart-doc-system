@@ -57,46 +57,34 @@ function App() {
       flexDirection: 'column',
       fontFamily: 'Segoe UI, Roboto, sans-serif'
     }}>
+      {/* Top Header */}
       <Navbar user={user} onLogout={handleLogout} />
 
+      {/* Centered Single-Column Main Container */}
       <main style={{
-        maxWidth: '1360px',
+        maxWidth: '760px', // Screen ke beech mein balanced width
         width: '100%',
-        margin: '24px auto',
-        padding: '0 24px',
-        boxSizing: 'border-box'
+        margin: '28px auto',
+        padding: '0 20px',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '28px' // Form aur Repository ke beech neat spacing
       }}>
-        {/* Strict side-by-side flexbox container */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'row',
-          gap: '24px',
-          alignItems: 'flex-start',
-          width: '100%',
-          boxSizing: 'border-box'
-        }}>
-          {/* Left: Digitize Form (Fixed comfortable width) */}
-          <div style={{
-            width: '380px',
-            minWidth: '380px',
-            flexShrink: 0
-          }}>
-            <UploadDoc user={user} onUploadSuccess={fetchDocuments} />
-          </div>
+        {/* 1. Digitize New Record Form (Screen ke bilkul center mein) */}
+        <section style={{ width: '100%' }}>
+          <UploadDoc user={user} onUploadSuccess={fetchDocuments} />
+        </section>
 
-          {/* Right: Central Document Repository (Fills remaining blank space) */}
-          <div style={{
-            flex: 1,
-            minWidth: 0
-          }}>
-            <DocList
-              documents={documents}
-              search={search}
-              setSearch={setSearch}
-              onStatusUpdate={fetchDocuments}
-            />
-          </div>
-        </div>
+        {/* 2. Central Document Repository (Form ke theek neeche) */}
+        <section style={{ width: '100%' }}>
+          <DocList
+            documents={documents}
+            search={search}
+            setSearch={setSearch}
+            onStatusUpdate={fetchDocuments}
+          />
+        </section>
       </main>
     </div>
   );
