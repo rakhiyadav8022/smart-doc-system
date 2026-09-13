@@ -76,21 +76,16 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
     pdf.save(`${(doc.title || 'document').replace(/[^a-zA-Z0-9]/g, '_')}_document.pdf`);
   };
 
-  // 12-digit number extraction prioritize karein
   const extractCardNumber = (text) => {
     if (!text) return 'Verified Citizen Identity';
-
-    // Pehle specific 12 digit format dhundo (XXXX XXXX XXXX ya XXXXXXXXXXXX)
     const twelveDigitMatch = text.match(/(?:aadhar|adhaar|aadhaar|uid)?\s*(?:no\.?|number|num)?[:\s-]*(\d{4}\s?\d{4}\s?\d{4})/i);
     if (twelveDigitMatch && twelveDigitMatch[1]) {
       return twelveDigitMatch[1];
     }
-
     const simple12Digits = text.match(/\b\d{12}\b/);
     if (simple12Digits) {
       return simple12Digits[0].replace(/(\d{4})(?=\d)/g, '$1 ');
     }
-
     return 'Verified Citizen Identity';
   };
 
@@ -108,7 +103,7 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
           boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
           overflow: 'hidden',
           marginTop: '10px',
-          maxWidth: '100%',
+          width: '100%',
           boxSizing: 'border-box'
         }}>
           <div style={{
@@ -237,12 +232,10 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
       backgroundColor: '#ffffff',
       border: '1px solid #cbd5e1',
       borderRadius: '12px',
-      padding: '16px 18px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+      padding: '20px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
       boxSizing: 'border-box',
-      width: '100%',
-      maxWidth: '100%',
-      overflow: 'hidden'
+      width: '100%'
     }}>
       <div style={{
         display: 'flex',
@@ -250,7 +243,7 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
         alignItems: 'center',
         marginBottom: '12px'
       }}>
-        <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>
+        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>
           🔍 Central Document Repository
         </h3>
         <span style={{
@@ -273,7 +266,7 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
         style={{
           width: '100%',
           boxSizing: 'border-box',
-          padding: '8px 12px',
+          padding: '9px 12px',
           borderRadius: '6px',
           border: '1.5px solid #cbd5e1',
           fontSize: '13px',
@@ -301,7 +294,7 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>{doc.title}</span>
+                <span style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{doc.title}</span>
                 <span style={{
                   backgroundColor: '#f1f5f9',
                   color: '#475569',

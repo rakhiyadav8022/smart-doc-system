@@ -39,25 +39,24 @@ function UploadDoc({ user, onUploadSuccess }) {
     }
   };
 
-  // Dedicated Inline Styles to bypass CSS cache/override issues
   const styles = {
     container: {
       backgroundColor: '#ffffff',
       border: '1px solid #cbd5e1',
       borderRadius: '12px',
-      padding: '24px',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
-      maxWidth: '420px',
+      padding: '22px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
       width: '100%',
+      boxSizing: 'border-box',
       fontFamily: 'Segoe UI, Roboto, sans-serif'
     },
     header: {
-      marginBottom: '18px',
+      marginBottom: '16px',
       borderBottom: '1px solid #f1f5f9',
       paddingBottom: '10px'
     },
     title: {
-      fontSize: '18px',
+      fontSize: '17px',
       fontWeight: '700',
       color: '#0f172a',
       margin: '0 0 4px 0'
@@ -70,7 +69,7 @@ function UploadDoc({ user, onUploadSuccess }) {
     form: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '14px'
+      gap: '13px'
     },
     fieldGroup: {
       display: 'flex',
@@ -82,12 +81,12 @@ function UploadDoc({ user, onUploadSuccess }) {
       fontWeight: '700',
       color: '#334155',
       textTransform: 'uppercase',
-      letterSpacing: '0.5px'
+      letterSpacing: '0.4px'
     },
     input: {
       width: '100%',
       boxSizing: 'border-box',
-      padding: '10px 12px',
+      padding: '9px 12px',
       borderRadius: '6px',
       border: '1.5px solid #cbd5e1',
       fontSize: '13px',
@@ -98,7 +97,7 @@ function UploadDoc({ user, onUploadSuccess }) {
     textarea: {
       width: '100%',
       boxSizing: 'border-box',
-      padding: '10px 12px',
+      padding: '9px 12px',
       borderRadius: '6px',
       border: '1.5px solid #cbd5e1',
       fontSize: '13px',
@@ -112,10 +111,10 @@ function UploadDoc({ user, onUploadSuccess }) {
       width: '100%',
       backgroundColor: '#1d4ed8',
       color: '#ffffff',
-      padding: '12px',
+      padding: '11px',
       borderRadius: '6px',
       border: 'none',
-      fontSize: '14px',
+      fontSize: '13px',
       fontWeight: '700',
       cursor: 'pointer',
       marginTop: '6px'

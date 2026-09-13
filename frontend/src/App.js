@@ -1,25 +1,103 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Navbar from './components/Navbar';
 import UploadDoc from './components/UploadDoc';
 import DocList from './components/DocList';
-import './App.css';
+import Login from './components/Login';
 
 function App() {
-  return (
-    <div className="app-container">
-      <Navbar />
-      
-      <div className="main-content">
-        {/* Left Form Section */}
-        <div className="left-panel">
-          <UploadDoc />
-        </div>
+  const [user, setUser] = useState(null);
+  const [documents, setDocuments] = useState([]);
+  const [search, setSearch] = useState('');
 
-        {/* Right Repository Section */}
-        <div className="right-panel">
-          <DocList />
+  useEffect(() => {
+    const savedUser = localStorage.getItem('doc_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const fetchDocuments = async () => {
+    const activeUser = user || JSON.parse(localStorage.getItem('doc_user') || '{}');
+    const userId = activeUser?.id || activeUser?._id;
+    if (!userId) return;
+
+    try {
+      const response = await axios.get(
+        `https://smart-doc-system.onrender.com/api/documents?userId=${userId}&search=${search}`
+      );
+      setDocuments(response.data);
+    } catch (err) {
+      console.error('Error fetching documents:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchDocuments();
+    }
+  }, [user, search]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('doc_user');
+    localStorage.removeItem('doc_token');
+    setUser(null);
+    setDocuments([]);
+  };
+
+  if (!user) {
+    return <Login onLoginSuccess={(userData) => setUser(userData)} />;
+  }
+
+  return (
+    <div style={{
+      backgroundColor: '#f1f5f9',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      fontFamily: 'Segoe UI, Roboto, sans-serif'
+    }}>
+      <Navbar user={user} onLogout={handleLogout} />
+
+      <main style={{
+        maxWidth: '1360px',
+        width: '100%',
+        margin: '24px auto',
+        padding: '0 24px',
+        boxSizing: 'border-box'
+      }}>
+        {/* Strict side-by-side flexbox container */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: '24px',
+          alignItems: 'flex-start',
+          width: '100%',
+          boxSizing: 'border-box'
+        }}>
+          {/* Left: Digitize Form (Fixed comfortable width) */}
+          <div style={{
+            width: '380px',
+            minWidth: '380px',
+            flexShrink: 0
+          }}>
+            <UploadDoc user={user} onUploadSuccess={fetchDocuments} />
+          </div>
+
+          {/* Right: Central Document Repository (Fills remaining blank space) */}
+          <div style={{
+            flex: 1,
+            minWidth: 0
+          }}>
+            <DocList
+              documents={documents}
+              search={search}
+              setSearch={setSearch}
+              onStatusUpdate={fetchDocuments}
+            />
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
