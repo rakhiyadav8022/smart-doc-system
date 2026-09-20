@@ -18,8 +18,53 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
     }
   };
 
+  // Full A4 Size Printable PDF Generator
   const handleDownloadPDF = (doc) => {
-    const pdf = new jsPDF();
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pageWidth = 210;
+    const pageHeight = 297;
+
+    // CASE 1: Agar User ne Marksheet / Document Image Upload ki hai (Direct Printable Copy)
+    if (doc.imageUrl) {
+      const img = new Image();
+      img.src = doc.imageUrl;
+      img.onload = () => {
+        const margin = 10; // 10mm printable margin
+        const maxWidth = pageWidth - (margin * 2);
+        const maxHeight = pageHeight - (margin * 2);
+
+        let imgWidth = img.width;
+        let imgHeight = img.height;
+        const ratio = imgWidth / imgHeight;
+
+        let renderWidth = maxWidth;
+        let renderHeight = renderWidth / ratio;
+
+        if (renderHeight > maxHeight) {
+          renderHeight = maxHeight;
+          renderWidth = renderHeight * ratio;
+        }
+
+        // Center on A4 paper
+        const xPos = (pageWidth - renderWidth) / 2;
+        const yPos = (pageHeight - renderHeight) / 2;
+
+        pdf.addImage(doc.imageUrl, 'JPEG', xPos, yPos, renderWidth, renderHeight);
+        pdf.save(`${(doc.title || 'document').replace(/[^a-zA-Z0-9]/g, '_')}_Official_Print.pdf`);
+      };
+
+      img.onerror = () => {
+        alert('Could not render document image for printing.');
+      };
+      return;
+    }
+
+    // CASE 2: Agar Image nahi hai (Sirf Digitized Text Entry hai)
     pdf.setDrawColor(20, 60, 120);
     pdf.setLineWidth(1);
     pdf.rect(10, 10, 190, 277);
@@ -62,24 +107,13 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
     pdf.setDrawColor(200);
     pdf.line(15, 80, 195, 80);
 
-    let nextY = 90;
-    if (doc.fileData) {
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Digitized Details:', 20, nextY);
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
-      const splitText = pdf.splitTextToSize(doc.fileData || '', 170);
-      pdf.text(splitText, 20, nextY + 8);
-      nextY += 15 + splitText.length * 5;
-    }
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Digitized / Extracted Content:', 20, 90);
 
-    if (doc.imageUrl) {
-      try {
-        pdf.addImage(doc.imageUrl, 'JPEG', 35, nextY, 140, 100);
-      } catch (e) {
-        console.error('PDF image render error:', e);
-      }
-    }
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    const splitText = pdf.splitTextToSize(doc.fileData || '', 170);
+    pdf.text(splitText, 20, 98);
 
     pdf.setFontSize(9);
     pdf.setTextColor(130);
@@ -90,9 +124,9 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
 
   const extractCardNumber = (text) => {
     if (!text) return 'Verified Record';
-    const twelveDigitMatch = text.match(/(?:aadhar|adhaar|aadhaar|uid)?\s*(?:no\.?|number|num)?[:\s-]*(\d{4}\s?\d{4}\s?\d{4})/i);
-    if (twelveDigitMatch && twelveDigitMatch[1]) {
-      return twelveDigitMatch[1];
+    const match = text.match(/(?:aadhar|adhaar|aadhaar|uid)?\s*(?:no\.?|number|num)?[:\s-]*(\d{4}\s?\d{4}\s?\d{4})/i);
+    if (match && match[1]) {
+      return match[1];
     }
     const simple12Digits = text.match(/\b\d{12}\b/);
     if (simple12Digits) {
@@ -161,19 +195,14 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
               flexShrink: 0
             }}>
               {doc.imageUrl ? (
-                <img src={doc.imageUrl} alt="Document" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={doc.imageUrl} alt="Doc" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 '👤'
               )}
             </div>
 
             <div style={{ flex: 1, minWidth: 0, fontSize: '12px', color: '#1e293b', lineHeight: '1.5' }}>
-              <pre style={{
-                margin: 0,
-                fontFamily: 'inherit',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word'
-              }}>
+              <pre style={{ margin: 0, fontFamily: 'inherit', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                 {doc.fileData}
               </pre>
             </div>
@@ -381,7 +410,7 @@ function DocList({ documents, search, setSearch, onStatusUpdate }) {
                     cursor: 'pointer'
                   }}
                 >
-                  📥 Download PDF
+                  🖨️ Download & Print PDF
                 </button>
               </div>
             </div>
